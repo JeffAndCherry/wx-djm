@@ -19,7 +19,7 @@ Page({
   data: {
     postsList: [],
     swiperList: [],
-    Swiper:false,
+    Swiper:true,
     isLastPage: false,
     page: 1,
     search: '',
@@ -198,7 +198,32 @@ Page({
       title: '正在加载',
       mask: true
     });
-    var getPostsRequest = wxRequest.getRequest(Api.getPosts(data));
+    wx.cloud.callFunction({
+      // 云函数名称
+      name: 'getPosts',
+      // 传给云函数的参数
+      data: data,
+    })
+      .then(res => {
+        res = getPostsRequest
+    });
+
+    var getPostsRequest = {};
+
+    wx.showLoading({
+      title: '正在加载',
+      mask: true
+    });
+    wx.cloud.callFunction({
+      // 云函数名称
+      name: 'getPosts',
+      // 传给云函数的参数
+      data: data,
+    })
+      .then(res => {
+        res = getPostsRequest
+      });
+
     getPostsRequest.then(response => {
       if (response.statusCode === 200) {
         if (response.data.length < self.data.per_page) {
