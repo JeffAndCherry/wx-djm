@@ -350,31 +350,32 @@ Page({
    * 获取文章内容
    */
   fetchDetailData: function (id) {
+    console.log("测试");
     var self = this;
     var getPostDetailRequest = wxRequest.getRequest(Api.getPostByID(id));
     var res;
     var _thumbsDisplay = 'nodisplay';
-    getPostDetailRequest.then(response => {
+    getPostDetailRequest.then(result => {
+      var response = result.data;
       res = response;
       //console.log(response.data);
-      WxParse.wxParse('article', 'html', response.data.content.rendered, self, 5);
-      response.data.title.rendered = util.ellipsisHTML(response.data.title.rendered);
+      WxParse.wxParse('article', 'html', response.data.content, self, 5);
+      response.data.title = util.ellipsisHTML(response.data.title);
       if (response.data.comments != null && response.data.comments != '') {
         self.setData({
           noComments: 'display',
           commentCount: " 有 " + response.data.comments + " 条评论 "
         });
       };
-      var _thumbsCount = response.data.thumbses;
-      if (response.data.thumbses != '0') {
+      var _thumbsCount = response.data.usefulNumber;
+      if (response.data.usefulNumber != '0') {
         _thumbsDisplay = "display"
       }
       self.setData({
         detail: response.data,
         thumbsCount: _thumbsCount,
         postID: id,
-        link: response.data.link,
-        detailDate: util.cutstr(response.data.date, 10, 1),
+        detailDate: util.cutstr(response.data.dateAdd, 10, 1),
         display: 'display',
         thumbsDisplay: _thumbsDisplay
       });
@@ -396,7 +397,7 @@ Page({
     })
     .then(response => {
       wx.setNavigationBarTitle({
-        title: util.ellipsisHTML(res.data.title.rendered)
+        title: util.ellipsisHTML(res.data.title)
       });
     })
     .then(response => {
@@ -427,7 +428,7 @@ Page({
                 }
               }
               item.date = util.cutstr(strdate, 10, 1);
-              item.title.rendered = util.ellipsisHTML(item.title.rendered); // 替换省略
+              item.title = util.ellipsisHTML(item.title); // 替换省略
               //console.log(item);
               return item;
             })),

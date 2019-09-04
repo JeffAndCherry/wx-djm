@@ -19,12 +19,12 @@ Page({
   data: {
     postsList: [],
     swiperList: [],
-    Swiper:true,
+    Swiper: false,
     isLastPage: false,
     page: 1,
     search: '',
     categories: 0,
-    per_page:10,
+    per_page: 10,
     loading: false,
     isLoading: "nospinner",
     isDisplay: "display",
@@ -37,6 +37,7 @@ Page({
   onLoad: function () {
     var self = this;
     self.fetchSwiperPosts();
+    self.fetchPostsData(self.data);
     self.setData({
       Navigation: config.getNavigation
     });
@@ -165,19 +166,15 @@ Page({
           isDisplay: "display"
         })
       }
-    })
-    .then(response => {
-      self.fetchPostsData(self.data);
-    })
-    .catch(function (response) {
-      console.log(response);
-      self.setData({
-        noDisplay: "nodisplay"
+    }).catch(function (response) {
+        console.log(response);
+        self.setData({
+          noDisplay: "nodisplay"
+        })
       })
-    })
-    .finally(function () {
+      .finally(function () {
 
-    });
+      });
   },
   /**
    * 获取文章数据列表
@@ -198,60 +195,32 @@ Page({
       title: '正在加载',
       mask: true
     });
-    wx.cloud.callFunction({
-      // 云函数名称
-      name: 'getPosts',
-      // 传给云函数的参数
-      data: data,
-    })
-      .then(res => {
-        res = getPostsRequest
-    });
-
-    var getPostsRequest = {};
-
-    wx.showLoading({
-      title: '正在加载',
-      mask: true
-    });
-    wx.cloud.callFunction({
-      // 云函数名称
-      name: 'getPosts',
-      // 传给云函数的参数
-      data: data,
-    })
-      .then(res => {
-        res = getPostsRequest
-      });
-
-    getPostsRequest.then(response => {
-      if (response.statusCode === 200) {
+    var getPostsRequest = wxRequest.getRequest(Api.getPosts(data));
+    getPostsRequest.then(result => {
+      var response = result.data
+      if (response.code === 0) {
         if (response.data.length < self.data.per_page) {
           self.setData({
             isLastPage: true
           });
         }
         self.setData({
-          isDisplay:"display",
+          isDisplay: "display",
           noDisplay: "display",
           postsList: self.data.postsList.concat(response.data.map(function (item) {
-            var strdate = item.date
+            var strdate = item.dateAdd
             if (item.category != null) {
               item.categoryImage = "../../images/ganeral-o.png";
             } else {
               item.categoryImage = "";
             }
-            if (item.thumbnail) {
-              if (item.thumbnail == null || item.thumbnail == '') {
-                item.thumbnail = "../../images/default.jpg";
-              }
-            } else {
-              if (item.meta.thumbnail == null || item.meta.thumbnail == '') {
-                item.meta.thumbnail = "../../images/default.jpg";
+            if (item.pic) {
+              if (item.pic == null || item.pic == '') {
+                item.pic = "../../images/default.jpg";
               }
             }
             item.date = util.cutstr(strdate, 10, 1);
-            item.title.rendered = util.ellipsisHTML(item.title.rendered); // 替换省略
+            item.title = util.ellipsisHTML(item.title); // 替换省略
             //console.log(item);
             return item;
           }))
@@ -277,27 +246,27 @@ Page({
         }
       }
     })
-    .catch(function (response) {
-      if (data.page == 1) {
-        self.setData({
-          loading: true,
-          noDisplay: "nodisplay"
-        });
-      } else {
-        wx.showModal({
-          title: '加载失败',
-          content: '加载数据失败, 请重试.',
-          showCancel: false,
-        });
-        self.setData({
-          page: data.page - 1
-        });
-      }
-    })
-    .finally(function (response) {
-      wx.hideLoading();
-      wx.stopPullDownRefresh();
-    });
+      .catch(function (response) {
+        if (data.page == 1) {
+          self.setData({
+            loading: true,
+            noDisplay: "nodisplay"
+          });
+        } else {
+          wx.showModal({
+            title: '加载失败',
+            content: '加载数据失败, 请重试.',
+            showCancel: false,
+          });
+          self.setData({
+            page: data.page - 1
+          });
+        }
+      })
+      .finally(function (response) {
+        wx.hideLoading();
+        wx.stopPullDownRefresh();
+      });
   },
   /**
    * 跳转至查看文章详情
@@ -316,7 +285,7 @@ Page({
   redictHome: function (e) {
     //console.log('查看某类别下的文章');  
     var id = e.currentTarget.dataset.id,
-    url = '/pages/index/index';
+      url = '/pages/index/index';
     wx.switchTab({
       url: url
     });

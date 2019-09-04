@@ -46,8 +46,16 @@ Page({
         categories: options.id,
         isCategory: true
       });
-      self.fetchCategoriesData(options.id);
+      
+    }else{
+      //默认展示新闻中心文章
+      options.id = 5401
+      self.setData({
+        categories: options.id,
+        isCategory: true
+      });
     }
+    self.fetchCategoriesData(options.id);
     if (options.search && options.search != '') {
       wx.setNavigationBarTitle({
         title: "搜索：【" + options.search + "】所有文章",
@@ -173,15 +181,15 @@ Page({
       categoriesList: []
     });
     var getCategoryRequest = wxRequest.getRequest(Api.getCategoryByID(id));
-    getCategoryRequest.then(response => {
+    getCategoryRequest.then(result => {
+      var response = result.data
       var cover = "";
-      if (typeof (response.data.cover) == "undefined" || response.data.cover == "") {
+      if (typeof (response.data.icon) == "undefined" || response.data.icon == "") {
         cover = "../../images/cover.png";
       } else {
-        cover = response.data.cover;
+        cover = response.data.icon;
       }
       self.setData({
-        categoriesList: response.data,
         categoriesImage: cover,
         categoriesName: response.data.name
       });
@@ -214,8 +222,9 @@ Page({
       mask: true
     });
     var getPostsRequest = wxRequest.getRequest(Api.getPosts(data));
-    getPostsRequest.then(response => {
-      if (response.statusCode === 200) {
+    getPostsRequest.then(result => {
+      var response = result
+      if (response.code === 0) {
         if (response.data.length < 20) {
           self.setData({
             isMore: true,
@@ -225,7 +234,7 @@ Page({
         self.setData({
           isDisplay: "display",
           postsList: self.data.postsList.concat(response.data.map(function (item) {
-            var strdate = item.date
+            var strdate = item.dateAdd
             if (item.category != null) {
               if (item.cover == null || item.cover == '') {
                 item.cover = "../../images/cover.png";
@@ -233,11 +242,11 @@ Page({
             } else {
               item.cover = "";
             }
-            if (item.thumbnail == null || item.thumbnail == '') {
+            if (item.pic == null || item.pic == '') {
               item.thumbnail = '../../images/default.png';
             }
             item.date = util.cutstr(strdate, 10, 1);
-            item.title.rendered = util.ellipsisHTML(item.title.rendered);
+            item.title = util.ellipsisHTML(item.title);
             return item;
           })),
         });

@@ -17,12 +17,12 @@ var per_page = 10;
 module.exports = {
   // 获取文章列表数据
   getPosts: function (obj) {
-    var url = HOST_URI + 'posts?per_page=' + obj.per_page +'&orderby=date&order=desc&page=' + obj.page;
+    var url = HOST_URI + '/cms/news/list?pageSize=' + obj.per_page +'&orderby=newer&order=desc&page=' + obj.page;
     if (obj.categories != 0) {
-      url += '&categories=' + obj.categories;
+      url += '&categoryId=' + obj.categories;
     }
     else if (obj.search != '') {
-      url += '&search=' + encodeURIComponent(obj.search);
+      url += '&keywordsLike=' + encodeURIComponent(obj.search);
     }     
     return url;
   },
@@ -48,7 +48,7 @@ module.exports = {
   },
   // 获取文章内容页
   getPostByID: function (id) {
-    return HOST_URI + 'posts/' + id;
+    return HOST_URI + 'cms/news/detail?id=' + id;
   },
   // 获取页面列表
   getPages: function () {
@@ -75,7 +75,7 @@ module.exports = {
   },
   //获取某个分类信息
   getCategoryByID: function (id) {
-    var url = HOST_URI + 'categories/' + id;
+    var url = HOST_URI + 'cms/category/detail?id=' + id;
     return url;
   },
   //获取最新20条评论
