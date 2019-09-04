@@ -30,7 +30,7 @@
         "text": "关于景区"
       },
       {
-        "pagePath": "pages/list/list",
+        "pagePath": "pages/rand/rand",
         "iconPath": "images/rand.png",
         "selectedIconPath": "images/rand-o.png",
         "text": "新闻中心"
