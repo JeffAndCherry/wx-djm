@@ -223,7 +223,7 @@ Page({
     });
     var getPostsRequest = wxRequest.getRequest(Api.getPosts(data));
     getPostsRequest.then(result => {
-      var response = result
+      var response = result.data
       if (response.code === 0) {
         if (response.data.length < 20) {
           self.setData({
